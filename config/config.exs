@@ -7,9 +7,24 @@
 # General application configuration
 import Config
 
+config :course_core, :scopes,
+  user: [
+    default: true,
+    module: CourseCore.Accounts.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :binary_id,
+    schema_table: :users,
+    test_data_fixture: CourseCore.AccountsFixtures,
+    test_setup_helper: :register_and_log_in_user
+  ]
+
 config :course_core,
   ecto_repos: [CourseCore.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
+
+config :course_core, CourseCore.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configures the endpoint
 config :course_core, CourseCoreWeb.Endpoint,
