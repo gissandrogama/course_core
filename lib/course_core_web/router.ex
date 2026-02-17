@@ -61,10 +61,14 @@ defmodule CourseCoreWeb.Router do
   scope "/", CourseCoreWeb do
     pipe_through [:browser]
 
-    live_session :current_user,
-      on_mount: [{CourseCoreWeb.UserAuth, :mount_current_scope}] do
+    live_session :redirect_if_user_is_authenticated,
+      on_mount: [{CourseCoreWeb.UserAuth, :redirect_if_user_is_authenticated}] do
       live "/sign_up", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
+    end
+
+    live_session :current_user,
+      on_mount: [{CourseCoreWeb.UserAuth, :mount_current_scope}] do
       live "/users/log-in/:token", UserLive.Confirmation, :new
     end
 

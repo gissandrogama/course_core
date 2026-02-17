@@ -96,6 +96,7 @@ defmodule CourseCoreWeb.UserLive.LoginTest do
     end
 
     test "shows login page with email filled in", %{conn: conn, user: user} do
+      conn = conn |> fetch_flash() |> put_flash(:error, "You must re-authenticate to access this page.")
       {:ok, _lv, html} = live(conn, ~p"/users/log-in")
 
       assert html =~ "You need to reauthenticate"

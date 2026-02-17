@@ -80,7 +80,7 @@ defmodule CourseCoreWeb.UserAuthTest do
         |> assign(:current_scope, Scope.for_user(user))
         |> UserAuth.log_in_user(user)
 
-      assert redirected_to(conn) == ~p"/users/settings"
+      assert redirected_to(conn) == ~p"/"
     end
 
     test "writes a cookie if remember_me was set in previous session", %{conn: conn, user: user} do
@@ -279,6 +279,27 @@ defmodule CourseCoreWeb.UserAuthTest do
 
       {:halt, updated_socket} = UserAuth.on_mount(:require_authenticated, %{}, session, socket)
       assert updated_socket.assigns.current_scope == nil
+    end
+  end
+
+  describe "on_mount :redirect_if_user_is_authenticated" do
+    test "redirects if user is authenticated", %{conn: conn, user: user} do
+      user_token = Accounts.generate_user_session_token(user)
+      session = conn |> put_session(:user_token, user_token) |> get_session()
+      socket = %LiveView.Socket{assigns: %{__changed__: %{}, flash: %{}}}
+
+      assert {:halt, updated_socket} =
+               UserAuth.on_mount(:redirect_if_user_is_authenticated, %{}, session, socket)
+
+      assert updated_socket.redirected == {:redirect, %{to: "/", status: 302}}
+    end
+
+    test "does not redirect if user is not authenticated", %{conn: _conn} do
+      session = %{}
+      socket = %LiveView.Socket{assigns: %{__changed__: %{}, flash: %{}}}
+
+      assert {:cont, _updated_socket} =
+               UserAuth.on_mount(:redirect_if_user_is_authenticated, %{}, session, socket)
     end
   end
 
