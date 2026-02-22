@@ -65,6 +65,9 @@ defmodule CourseCoreWeb.Router do
       on_mount: [{CourseCoreWeb.UserAuth, :require_authenticated}],
       layout: {CourseCoreWeb.Layouts, :instructor} do
       live "/", InstructorLive.Dashboard, :index
+      live "/courses", InstructorLive.CourseList, :index
+      live "/courses/new", InstructorLive.CourseForm, :new
+      live "/courses/:id/edit", InstructorLive.CourseForm, :edit
     end
   end
 
