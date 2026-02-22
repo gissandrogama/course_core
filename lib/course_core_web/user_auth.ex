@@ -250,7 +250,8 @@ defmodule CourseCoreWeb.UserAuth do
     socket = mount_current_scope(socket, session)
     flash_msg = Phoenix.Flash.get(socket.assigns.flash, :error)
 
-    if socket.assigns.current_scope && socket.assigns.current_scope.user && flash_msg != @reauth_msg do
+    if socket.assigns.current_scope && socket.assigns.current_scope.user &&
+         flash_msg != @reauth_msg do
       {:halt, Phoenix.LiveView.redirect(socket, to: signed_in_path(socket))}
     else
       {:cont, socket}

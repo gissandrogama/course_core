@@ -59,10 +59,10 @@ defmodule CourseCoreWeb.UserLive.Registration do
       {:ok, user} ->
         token = Accounts.generate_login_token(user)
 
-         {:noreply,
-          socket
-          |> put_flash(:info, "Account created successfully!")
-          |> push_navigate(to: ~p"/users/magic_log_in/#{token}")}
+        {:noreply,
+         socket
+         |> put_flash(:info, "Account created successfully!")
+         |> push_navigate(to: ~p"/users/magic_log_in/#{token}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}

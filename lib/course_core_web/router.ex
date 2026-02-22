@@ -58,6 +58,16 @@ defmodule CourseCoreWeb.Router do
     post "/users/update-password", UserSessionController, :update_password
   end
 
+  scope "/instructor", CourseCoreWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :instructor,
+      on_mount: [{CourseCoreWeb.UserAuth, :require_authenticated}],
+      layout: {CourseCoreWeb.Layouts, :instructor} do
+      live "/", InstructorLive.Dashboard, :index
+    end
+  end
+
   scope "/", CourseCoreWeb do
     pipe_through [:browser]
 

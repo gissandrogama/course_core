@@ -86,6 +86,7 @@ defmodule CourseCoreWeb do
       import Phoenix.HTML
       # Core UI components
       import CourseCoreWeb.CoreComponents
+      import CourseCoreWeb.InstructorComponents
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS
