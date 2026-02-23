@@ -1,0 +1,29 @@
+<div class="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100">
+  <!-- Sidebar -->
+  <.sidebar
+    current_page={@current_page || :dashboard}
+    current_user={@current_user}
+  />
+  
+<!-- Main Content Area -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+    <!-- Header -->
+    <.top_bar
+      breadcrumbs={@breadcrumbs || []}
+      active_course={@active_course}
+    />
+    
+<!-- Page Content -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-8">
+      <div class="max-w-7xl mx-auto">
+        <.flash_group flash={@flash} />
+        {render_slot(@inner_block)}
+        
+<!-- Footer -->
+        <footer class="mt-12 text-center text-slate-400 text-xs py-8 border-t border-slate-200 dark:border-slate-800">
+          © {DateTime.utc_now() |> Map.get(:year)} EduStream Pro. Instructor Administration Panel.
+        </footer>
+      </div>
+    </div>
+  </main>
+</div>
