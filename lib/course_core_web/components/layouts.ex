@@ -5,86 +5,147 @@ defmodule CourseCoreWeb.Layouts do
   """
   use CourseCoreWeb, :html
 
-  # Embed all files in layouts/* within this module.
-  # The default root.html.heex file contains the HTML
-  # skeleton of your application, namely HTML headers
-  # and other static content.
   embed_templates "layouts/*"
 
   @doc """
   Renders your app layout.
-
-  This function is typically invoked from every template,
-  and it often contains your application menu, sidebar,
-  or similar.
-
-  ## Examples
-
-      <Layouts.app flash={@flash}>
-        <h1>Content</h1>
-      </Layouts.app>
-
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
-
-  attr :current_scope, :map,
-    default: nil,
-    doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
-
+  attr :current_scope, :map, default: nil, doc: "the current user scope"
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
+    <div class="min-h-screen bg-base-200 flex">
+      <!-- Sidebar -->
+      <aside class="hidden lg:flex flex-col w-64 bg-base-100 border-r border-base-300 h-screen sticky top-0">
+        <div class="p-6 flex items-center gap-3">
+          <img src={~p"/images/logo.svg"} width="32" class="text-primary" />
+          <span class="text-xl font-bold tracking-tight">CourseCore</span>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+          <.sidebar_link navigate={~p"/"} icon="hero-home">
+            Dashboard
+          </.sidebar_link>
+
+          <%= if @current_scope do %>
+            <.sidebar_link navigate={~p"/users/settings"} icon="hero-cog-6-tooth">
+              Settings
+            </.sidebar_link>
+          <% end %>
+        </nav>
+
+        <div class="p-4 border-t border-base-300">
+          <%= if @current_scope do %>
+            <div class="flex items-center gap-3 mb-4 px-2">
+              <div class="avatar placeholder">
+                <div class="bg-neutral text-neutral-content rounded-full w-8">
+                  <span class="text-xs">{String.at(@current_scope.user.email, 0) |> String.upcase()}</span>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate">{@current_scope.user.email}</p>
+              </div>
+            </div>
+            <.link
+              href={~p"/users/log-out"}
+              method="delete"
+              class="btn btn-sm btn-ghost w-full justify-start gap-3 text-error"
+            >
+              <.icon name="hero-arrow-right-on-rectangle" class="w-4 h-4" />
+              Log out
+            </.link>
+          <% else %>
+            <div class="space-y-2">
+              <.link href={~p"/users/log-in"} class="btn btn-primary btn-sm w-full">Log in</.link>
+              <.link href={~p"/sign_up"} class="btn btn-outline btn-sm w-full">Register</.link>
+            </div>
+          <% end %>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="flex-1 flex flex-col min-w-0">
+        <!-- Mobile Header -->
+        <header class="lg:hidden bg-base-100 border-b border-base-300 p-4 flex items-center justify-between sticky top-0 z-20">
+          <div class="flex items-center gap-3">
+            <img src={~p"/images/logo.svg"} width="28" />
+            <span class="font-bold">CourseCore</span>
+          </div>
+          <!-- Mobile Menu Button could go here, for now simpler implementation -->
+          <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+              <.icon name="hero-bars-3" class="w-6 h-6" />
+            </div>
+            <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+              <li><.link navigate={~p"/"}>Dashboard</.link></li>
+              <%= if @current_scope do %>
+                <li><.link navigate={~p"/users/settings"}>Settings</.link></li>
+                <li><.link href={~p"/users/log-out"} method="delete" class="text-error">Log out</.link></li>
+              <% else %>
+                <li><.link href={~p"/users/log-in"}>Log in</.link></li>
+                <li><.link href={~p"/sign_up"}>Register</.link></li>
+              <% end %>
+            </ul>
+          </div>
+        </header>
+
+        <!-- Desktop Header (optional, for breadcrumbs/theme toggle) -->
+        <header class="hidden lg:flex items-center justify-between px-8 py-4 bg-base-100/50 backdrop-blur border-b border-base-200 sticky top-0 z-10">
+          <div class="text-sm breadcrumbs">
+            <ul>
+              <li>Home</li>
+              <!-- We can make this dynamic later -->
+            </ul>
+          </div>
+          <div class="flex items-center gap-4">
             <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+          </div>
+        </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
-        {render_slot(@inner_block)}
+        <main class="flex-1 p-4 lg:p-8 overflow-y-auto">
+          <.flash_group flash={@flash} />
+          <div class="mx-auto max-w-6xl">
+            {render_slot(@inner_block)}
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
+    """
+  end
 
-    <.flash_group flash={@flash} />
+  @doc """
+  Renders a sidebar link.
+  Highlights the link if it matches the current path (basic logic).
+  """
+  attr :navigate, :string, required: true
+  attr :icon, :string, required: true
+  slot :inner_block, required: true
+
+  def sidebar_link(assigns) do
+    ~H"""
+    <a
+      href={@navigate}
+      data-phx-link="redirect"
+      data-phx-link-state="push"
+      class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium hover:bg-base-200 transition-colors"
+    >
+      <.icon name={@icon} class="w-5 h-5 opacity-70" />
+      {render_slot(@inner_block)}
+    </a>
     """
   end
 
   @doc """
   Shows the flash group with standard titles and content.
-
-  ## Examples
-
-      <.flash_group flash={@flash} />
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
   attr :id, :string, default: "flash-group", doc: "the optional id of flash container"
 
   def flash_group(assigns) do
     ~H"""
-    <div id={@id} aria-live="polite">
+    <div id={@id} aria-live="polite" class="mb-6">
       <.flash kind={:info} flash={@flash} />
       <.flash kind={:error} flash={@flash} />
 
@@ -116,37 +177,34 @@ defmodule CourseCoreWeb.Layouts do
   end
 
   @doc """
-  Provides dark vs light theme toggle based on themes defined in app.css.
-
-  See <head> in root.html.heex which applies the theme before page load.
+  Provides dark vs light theme toggle.
   """
   def theme_toggle(assigns) do
     ~H"""
-    <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
-      <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left]" />
-
+    <div class="join border border-base-300 rounded-full p-0.5">
       <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="system"
-      >
-        <.icon name="hero-computer-desktop-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
-
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
+        class="join-item px-2 py-1 text-xs hover:bg-base-200 rounded-l-full"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="light"
+        aria-label="Light theme"
       >
-        <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-sun" class="w-4 h-4" />
       </button>
-
       <button
-        class="flex p-2 cursor-pointer w-1/3"
+        class="join-item px-2 py-1 text-xs hover:bg-base-200"
+        phx-click={JS.dispatch("phx:set-theme")}
+        data-phx-theme="system"
+        aria-label="System theme"
+      >
+        <.icon name="hero-computer-desktop" class="w-4 h-4" />
+      </button>
+      <button
+        class="join-item px-2 py-1 text-xs hover:bg-base-200 rounded-r-full"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="dark"
+        aria-label="Dark theme"
       >
-        <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-moon" class="w-4 h-4" />
       </button>
     </div>
     """
